@@ -1,0 +1,46 @@
+OpenMP parallelism
+
+ITERATIONS:  31250000
+Pi estimate: 3.14159262158977847790, obtained in 0.022288 seconds, iterations: 31250000
+DONE 
+ITERATIONS:  62500000
+Pi estimate: 3.14159263758972162606, obtained in 0.042992 seconds, iterations: 62500000
+DONE 
+ITERATIONS:  125000000
+Pi estimate: 3.14159264558957884717, obtained in 0.085207 seconds, iterations: 125000000
+DONE 
+ITERATIONS:  250000000
+Pi estimate: 3.14159264958972572757, obtained in 0.179741 seconds, iterations: 250000000
+DONE 
+ITERATIONS:  500000000
+Pi estimate: 3.14159265158986267252, obtained in 0.337964 seconds, iterations: 500000000
+DONE 
+ITERATIONS:  1000000000
+Pi estimate: 3.14159265259010700433, obtained in 0.671338 seconds, iterations: 1000000000
+DONE 
+ITERATIONS:  2000000000
+Pi estimate: 3.14159265309020474533, obtained in 1.403166 seconds, iterations: 2000000000
+DONE 
+ITERATIONS:  4000000000
+Pi estimate: 0.00000000000000000000, obtained in 0.000889 seconds, iterations: -294967296
+DONE 
+ITERATIONS:  8000000000
+Pi estimate: 0.00000000000000000000, obtained in 0.000816 seconds, iterations: -589934592
+DONE 
+ITERATIONS:  16000000000
+Pi estimate: 0.00000000000000000000, obtained in 0.000836 seconds, iterations: -1179869184
+DONE 
+
+JOB STATISTICS
+==============
+Job ID: 9549014
+Cluster: snellius
+User/Group: scur1235/scur1235
+State: COMPLETED (exit code 0)
+Nodes: 1
+Cores per node: 32
+CPU Utilized: 00:01:27
+CPU Efficiency: 30.21% of 00:04:48 core-walltime
+Job Wall-clock time: 00:00:09
+Memory Utilized: 2.36 MB
+Memory Efficiency: 0.00% of 224.00 GB

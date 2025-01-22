@@ -1,0 +1,25 @@
+OpenMP parallelism
+
+ITERATIONS:  31250000
+Pi estimate: 3.14159262158977758972, obtained in 0.022316 seconds, iterations: 31250000
+DONE 
+ITERATIONS:  31250000
+Pi estimate: 3.14159262158977847790, obtained in 0.022196 seconds, iterations: 31250000
+DONE 
+ITERATIONS:  2000000000
+Pi estimate: 3.14159265309020474533, obtained in 1.406001 seconds, iterations: 2000000000
+DONE 
+
+JOB STATISTICS
+==============
+Job ID: 9548985
+Cluster: snellius
+User/Group: scur1235/scur1235
+State: COMPLETED (exit code 0)
+Nodes: 1
+Cores per node: 32
+CPU Utilized: 00:00:46
+CPU Efficiency: 13.07% of 00:05:52 core-walltime
+Job Wall-clock time: 00:00:11
+Memory Utilized: 2.31 MB
+Memory Efficiency: 0.00% of 224.00 GB

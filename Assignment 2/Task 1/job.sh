@@ -12,7 +12,7 @@ module load 2022
 module load GCCcore/11.3.0 
 echo "OpenMP parallelism" 
 echo 
-for ncores in `seq 0 4 512` 
+for ncores in `seq 8 4 48` 
 do 
 export OMP_NUM_THREADS=$ncores 
 echo "CPUS: " $OMP_NUM_THREADS 
