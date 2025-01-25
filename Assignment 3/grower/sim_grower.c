@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "grower.h"
 #include <unistd.h>
+#include <omp.h>
 
 int **allocate_grid() {
     int **grid = malloc(3000 * sizeof(int *));
@@ -22,6 +23,7 @@ int **allocate_grid() {
 
 // Initialize the entire grid to 0
 void init_grid(int **grid) {
+    #pragma omp parallel for
     for (int i = 0; i < 3000; i++) {
         for (int j = 0; j < 3000; j++) {
             grid[i][j] = 0;
@@ -61,6 +63,8 @@ void free_grid(int **grid) {
 }
 
 int main(int argc, char *argv[]){
+    double start, end; 
+    int new_population = 0;
     printf("Starting the program...\n");
 
     // Allocate two grids for double buffering
@@ -85,12 +89,16 @@ int main(int argc, char *argv[]){
     // Place the pattern in old_grid
     place_pattern(old_grid, start_row, start_col);
 
-    printf("Initial grid (partial view):\n");
-    print_grid(old_grid, start_row - 50, start_col - 50, GROWER_HEIGHT + 100, GROWER_WIDTH + 100);
+    // printf("Initial grid (partial view):\n");
+    // print_grid(old_grid, start_row - 50, start_col - 50, GROWER_HEIGHT + 100, GROWER_WIDTH + 100);
 
-    int iter = 100;
+    int iter = 5000;
+    start = omp_get_wtime();
     for (int curr = 0; curr < iter; curr++) {
         // For each cell, count neighbors from old_grid and write the new state to new_grid
+        new_population = 0;
+        
+        #pragma omp parallel for reduction(+:new_population)
         for (int i = 0; i < 3000; i++) {
             for (int j = 0; j < 3000; j++) {
                 int cell = old_grid[i][j];
@@ -114,35 +122,36 @@ int main(int argc, char *argv[]){
 
                 if (cell == 1) { // alive
                     if (live_neighbors == 2 || live_neighbors == 3) {
-                        new_grid[i][j] = 1; 
+                        new_grid[i][j] = 1;
+                        new_population ++;
                     } else {
                         new_grid[i][j] = 0;
                     }
                 } else { // dead
                     if (live_neighbors == 3) {
                         new_grid[i][j] = 1;
+                        new_population ++;
                     } else {
                         new_grid[i][j] = 0;
                     }
                 }
             }
         }
-
+        // print_grid(new_grid, start_row - 50, start_col - 50, GROWER_HEIGHT + 50, GROWER_WIDTH+50);
         printf("\n\nIteration %d:\n", curr + 1);
-        print_grid(new_grid, start_row - 50, start_col - 50, GROWER_HEIGHT + 100, GROWER_WIDTH + 100);
+        printf("Population %d:\n", new_population);
 
         // Swap old_grid and new_grid pointers
         int **temp = old_grid;
         old_grid = new_grid;
         new_grid = temp;
-
-
     }
 
+    end = omp_get_wtime();
     // Free both grids
     free_grid(old_grid);
     free_grid(new_grid);
 
-    printf("Program completed successfully.\n");
+    printf("Program completed successfully. Took %f seconds\n", end-start);
     return 0;
 }
