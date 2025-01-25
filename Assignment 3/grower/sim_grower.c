@@ -3,7 +3,6 @@
 #include "grower.h"
 #include <unistd.h>
 
-// Helper function to allocate a 3000x3000 grid on the heap.
 int **allocate_grid() {
     int **grid = malloc(3000 * sizeof(int *));
     if (!grid) {
@@ -113,7 +112,6 @@ int main(int argc, char *argv[]){
                     }
                 }
 
-                // Apply rules (Conway's Game of Life as an example)
                 if (cell == 1) { // alive
                     if (live_neighbors == 2 || live_neighbors == 3) {
                         new_grid[i][j] = 1; 
@@ -130,7 +128,6 @@ int main(int argc, char *argv[]){
             }
         }
 
-        // Print the updated grid (optional)
         printf("\n\nIteration %d:\n", curr + 1);
         print_grid(new_grid, start_row - 50, start_col - 50, GROWER_HEIGHT + 100, GROWER_WIDTH + 100);
 
