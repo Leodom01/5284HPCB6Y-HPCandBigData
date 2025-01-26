@@ -84,11 +84,13 @@ def parse_rle(filename) -> Pattern:
                     row.append(True)
                 else:
                     row.extend([True]*repeat)
-            elif c == '$' or c == '!':
+            elif c == '$':  # updated
                 while len(row) < width:
-                    row.append(False)
+                    row.append(False)  
                 rows.append(row)
                 row = []
+                if saw_repeat:  
+                    rows.extend([[False] * width] * (repeat - 1))
             elif c == '!':
                 while len(row) < width:
                     row.append(False)

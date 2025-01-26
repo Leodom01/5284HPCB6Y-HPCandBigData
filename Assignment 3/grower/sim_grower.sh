@@ -2,7 +2,7 @@
 #SBATCH --job-name="sim_grower"
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=12
+#SBATCH --cpus-per-task=128
 #SBATCH --time=05:00:00
 #SBATCH --partition=rome
 
