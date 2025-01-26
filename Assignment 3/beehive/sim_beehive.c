@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "grower.h"
+#include "beehive.h"
 #include <unistd.h>
 #include <omp.h>
 
@@ -31,11 +31,11 @@ void init_grid(int **grid) {
     }
 }
 
-// Copy the pattern (grower) into a specific location in the grid
+// Copy the pattern into a specific location in the grid
 void place_pattern(int **grid, int start_row, int start_col) {
-    for (int i = 0; i < GROWER_HEIGHT; i++) {
-        for (int j = 0; j < GROWER_WIDTH; j++) {
-            grid[start_row + i][start_col + j] = grower[i][j];
+    for (int i = 0; i < BEEHIVE_HEIGHT; i++) {
+        for (int j = 0; j < BEEHIVE_WIDTH; j++) {
+            grid[start_row + i][start_col + j] = beehive[i][j];
         }
     }
 }
@@ -79,8 +79,8 @@ int main(int argc, char *argv[]){
     int start_col = 1500;
 
     // Safety check: ensure the pattern fits
-    if (start_row + GROWER_HEIGHT > 3000 || start_col + GROWER_WIDTH > 3000) {
-        fprintf(stderr, "Error: Grower does not fit within the grid bounds.\n");
+    if (start_row + BEEHIVE_HEIGHT > 3000 || start_col + BEEHIVE_WIDTH > 3000) {
+        fprintf(stderr, "Error: Pattern does not fit within the grid bounds.\n");
         free_grid(old_grid);
         free_grid(new_grid);
         return 1;
