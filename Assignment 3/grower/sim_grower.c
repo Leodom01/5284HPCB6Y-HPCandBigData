@@ -92,15 +92,39 @@ int main(int argc, char *argv[]){
     // printf("Initial grid (partial view):\n");
     // print_grid(old_grid, start_row - 50, start_col - 50, GROWER_HEIGHT + 100, GROWER_WIDTH + 100);
 
+    int minRow = start_row; 
+    int maxRow = start_row + GROWER_HEIGHT - 1;
+    int minCol = start_col;
+    int maxCol = start_col + GROWER_WIDTH - 1;
+
     int iter = 5000;
     start = omp_get_wtime();
     for (int curr = 0; curr < iter; curr++) {
-        // For each cell, count neighbors from old_grid and write the new state to new_grid
-        new_population = 0;
-        
-        #pragma omp parallel for reduction(+:new_population)
+
+        // Zero out new grid incase min/max bounds shrunk
+        #pragma omp parallel for
         for (int i = 0; i < 3000; i++) {
             for (int j = 0; j < 3000; j++) {
+                new_grid[i][j] = 0;
+            }
+        }
+
+        // For each cell, count neighbors from old_grid and write the new state to new_grid
+        new_population = 0;
+
+        // Expand the bounding box by 1 so we consider neighbors:
+        int scanMinRow = (minRow > 0) ? (minRow - 1) : 0;
+        int scanMaxRow = (maxRow < 2999) ? (maxRow + 1) : 2999;
+        int scanMinCol = (minCol > 0) ? (minCol - 1) : 0;
+        int scanMaxCol = (maxCol < 2999) ? (maxCol + 1) : 2999;
+
+        // Temporary next iteration bounding box
+        int newMinRow = 3000, newMaxRow = -1;
+        int newMinCol = 3000, newMaxCol = -1;
+
+        #pragma omp parallel for reduction(+:new_population)
+        for (int i = scanMinRow; i <= scanMaxRow; i++) {
+            for (int j = scanMinCol; j <= scanMaxCol; j++) {
                 int cell = old_grid[i][j];
                 int live_neighbors = 0;
 
@@ -124,6 +148,12 @@ int main(int argc, char *argv[]){
                     if (live_neighbors == 2 || live_neighbors == 3) {
                         new_grid[i][j] = 1;
                         new_population ++;
+
+                        // Update newMin / newMax
+                        if (i < newMinRow) newMinRow = i;
+                        if (i > newMaxRow) newMaxRow = i;
+                        if (j < newMinCol) newMinCol = j;
+                        if (j > newMaxCol) newMaxCol = j;
                     } else {
                         new_grid[i][j] = 0;
                     }
@@ -131,20 +161,39 @@ int main(int argc, char *argv[]){
                     if (live_neighbors == 3) {
                         new_grid[i][j] = 1;
                         new_population ++;
+
+                        // Update newMin / newMax
+                        if (i < newMinRow) newMinRow = i;
+                        if (i > newMaxRow) newMaxRow = i;
+                        if (j < newMinCol) newMinCol = j;
+                        if (j > newMaxCol) newMaxCol = j;
                     } else {
                         new_grid[i][j] = 0;
                     }
                 }
             }
         }
-        // print_grid(new_grid, start_row - 50, start_col - 50, GROWER_HEIGHT + 50, GROWER_WIDTH+50);
-        printf("\n\nIteration %d:\n", curr + 1);
-        printf("Population %d:\n", new_population);
+        // Update bounding box for next iteration
+        if (newMinRow <= newMaxRow && newMinCol <= newMaxCol) {
+            minRow = newMinRow;
+            maxRow = newMaxRow;
+            minCol = newMinCol;
+            maxCol = newMaxCol;
+        } else {
+            // no cells were alive
+            minRow = minCol = 0;
+            maxRow = maxCol = -1;
+        }
 
+        // print_grid(new_grid, start_row - 50, start_col - 50, GROWER_HEIGHT + 50, GROWER_WIDTH+100);
+        printf("\nIteration %d; Population %d", curr + 1, new_population);
+        
         // Swap old_grid and new_grid pointers
         int **temp = old_grid;
         old_grid = new_grid;
         new_grid = temp;
+
+
     }
 
     end = omp_get_wtime();
