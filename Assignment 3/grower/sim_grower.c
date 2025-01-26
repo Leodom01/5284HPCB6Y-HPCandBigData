@@ -6,6 +6,12 @@
 
 #define N 3000
 
+/**
+ * Allocates a 2D grid of size N x N in memory.
+ * 
+ * @return Pointer to the allocated grid.
+ * @throws Exits the program if memory allocation fails and print to stderr.
+ */
 int **allocate_grid() {
     int **grid = malloc(N * sizeof(int *));
     if (!grid) {
@@ -22,7 +28,11 @@ int **allocate_grid() {
     return grid;
 }
 
-// Initialize the entire grid to 0
+/**
+ * Initializes all elements of the grid to 0 in a parallelized fashion
+ * 
+ * @param grid Pointer to the grid to initialize.
+ */
 void init_grid(int **grid) {
 #pragma omp parallel for
     for (int i = 0; i < N; i++) {
@@ -32,6 +42,13 @@ void init_grid(int **grid) {
     }
 }
 
+/**
+ * Places the predefined pattern (taken from grower.h) on the grid starting at the given position.
+ * 
+ * @param grid Pointer to the grid.
+ * @param start_row Row index where the pattern should spawn on the grid.
+ * @param start_col Column index where the pattern should spawn on the grid.
+ */
 void place_pattern(int **grid, int start_row, int start_col) {
     for (int i = 0; i < GROWER_HEIGHT; i++) {
         for (int j = 0; j < GROWER_WIDTH; j++) {
@@ -40,6 +57,15 @@ void place_pattern(int **grid, int start_row, int start_col) {
     }
 }
 
+/**
+ * Prints a portion of the grid (used for debugging purposes).
+ * 
+ * @param grid Pointer to the grid.
+ * @param start_row Starting row index for printing.
+ * @param start_col Starting column index for printing.
+ * @param rows_to_print Number of rows to print.
+ * @param cols_to_print Number of columns to print.
+ */
 void print_grid(int **grid, int start_row, int start_col, int rows_to_print, int cols_to_print) {
     for (int i = start_row; i < start_row + rows_to_print; i++) {
         for (int j = start_col; j < start_col + cols_to_print; j++) {
@@ -53,6 +79,11 @@ void print_grid(int **grid, int start_row, int start_col, int rows_to_print, int
     }
 }
 
+/**
+ * Frees the memory allocated for a grid.
+ * 
+ * @param grid Pointer to the grid to free.
+ */
 void free_grid(int **grid) {
     for (int i = 0; i < N; i++) {
         free(grid[i]);
@@ -60,10 +91,18 @@ void free_grid(int **grid) {
     free(grid);
 }
 
-int main(int argc, char *argv[]){
+/**
+ * Main function that runs the simulation.
+ * 
+ * @param argc Number of command-line arguments.
+ * @param argv Array of command-line arguments.
+ * @return Exit status code (0 for success, 1 for error).
+ */
+int main(int argc, char *argv[]) {
     printf("Starting the program...\n");
     double start = omp_get_wtime();
 
+    // Allocate memory for grids
     int **old_grid = allocate_grid();
     int **new_grid = allocate_grid();
 
@@ -74,7 +113,7 @@ int main(int argc, char *argv[]){
     int start_row = 1500;
     int start_col = 1500;
 
-    // Safety check: ensure the pattern fits
+    // Ensure the pattern fits within the grid bounds
     if (start_row + GROWER_HEIGHT > N || start_col + GROWER_WIDTH > N) {
         fprintf(stderr, "Error: Grower does not fit within the grid bounds.\n");
         free_grid(old_grid);
@@ -82,6 +121,7 @@ int main(int argc, char *argv[]){
         return 1;
     }
 
+    // Place the pattern on the grid
     place_pattern(old_grid, start_row, start_col);
 
     // Initial bounding box for the pattern
@@ -92,40 +132,36 @@ int main(int argc, char *argv[]){
 
     int iter = 5000;
 
-    // 8 possible neighbor directions
+    // Define the 8 possible neighbor directions
     static const int directions[8][2] = {
         {-1, -1}, {-1, 0}, {-1, 1},
         { 0, -1},          { 0, 1},
         { 1, -1}, { 1, 0}, { 1, 1}
     };
 
+    int global_population;
+
+    // Main simulation loop, one cycle per iteration
     for (int curr = 0; curr < iter; curr++) {
+        // Reset new_grid to zero
+        init_grid(new_grid);
 
-        // Zero out new_grid to avoid stale cells (especially if bounding box shrinks)
-        #pragma omp parallel for
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                new_grid[i][j] = 0;
-            }
-        }
+        // Expand the bounding box for neighbor checking
+        int scanMinRow = (minRow > 0) ? (minRow - 1) : 0;
+        int scanMaxRow = (maxRow < N - 1) ? (maxRow + 1) : (N - 1);
+        int scanMinCol = (minCol > 0) ? (minCol - 1) : 0;
+        int scanMaxCol = (maxCol < N - 1) ? (maxCol + 1) : (N - 1);
 
-        // Expand bounding box by 1 so we consider neighbors
-        int scanMinRow = (minRow > 0)       ? (minRow - 1) : 0;
-        int scanMaxRow = (maxRow < N - 1)   ? (maxRow + 1) : (N - 1);
-        int scanMinCol = (minCol > 0)       ? (minCol - 1) : 0;
-        int scanMaxCol = (maxCol < N - 1)   ? (maxCol + 1) : (N - 1);
+        global_population = 0;
 
-        int global_population = 0;
-
-        // We'll store boundaries in global variables but update them via local variables in each thread
-        int newMinRow = N,    newMaxRow = -1;
-        int newMinCol = N,    newMaxCol = -1;
+        // Thread-local variables for bounding box and population
+        int newMinRow = N, newMaxRow = -1;
+        int newMinCol = N, newMaxCol = -1;
 
         #pragma omp parallel
         {
-            // Each thread's local bounding box
-            int localMinRow = N,    localMaxRow = -1;
-            int localMinCol = N,    localMaxCol = -1;
+            int localMinRow = N, localMaxRow = -1;
+            int localMinCol = N, localMaxCol = -1;
             int localPop = 0;
 
             #pragma omp for
@@ -134,7 +170,7 @@ int main(int argc, char *argv[]){
                     int cell = old_grid[i][j];
                     int live_neighbors = 0;
 
-                    // Count neighbors
+                    // Count live neighbors
                     for (int d = 0; d < 8; d++) {
                         int ni = i + directions[d][0];
                         int nj = j + directions[d][1];
@@ -144,31 +180,25 @@ int main(int argc, char *argv[]){
                     }
 
                     // Apply Game of Life rules
-                    if (cell == 1) { // alive
-                        if (live_neighbors == 2 || live_neighbors == 3) {
-                            new_grid[i][j] = 1;
-                            localPop++;
-                            // Update local bounding box
-                            if (i < localMinRow) localMinRow = i;
-                            if (i > localMaxRow) localMaxRow = i;
-                            if (j < localMinCol) localMinCol = j;
-                            if (j > localMaxCol) localMaxCol = j;
-                        }
-                    } else { // dead
-                        if (live_neighbors == 3) {
-                            new_grid[i][j] = 1;
-                            localPop++;
-                            // Update local bounding box
-                            if (i < localMinRow) localMinRow = i;
-                            if (i > localMaxRow) localMaxRow = i;
-                            if (j < localMinCol) localMinCol = j;
-                            if (j > localMaxCol) localMaxCol = j;
-                        }
+                    if (cell == 1 && (live_neighbors == 2 || live_neighbors == 3)) {
+                        new_grid[i][j] = 1;
+                        localPop++;
+                        if (i < localMinRow) localMinRow = i;
+                        if (i > localMaxRow) localMaxRow = i;
+                        if (j < localMinCol) localMinCol = j;
+                        if (j > localMaxCol) localMaxCol = j;
+                    } else if (cell == 0 && live_neighbors == 3) {
+                        new_grid[i][j] = 1;
+                        localPop++;
+                        if (i < localMinRow) localMinRow = i;
+                        if (i > localMaxRow) localMaxRow = i;
+                        if (j < localMinCol) localMinCol = j;
+                        if (j > localMaxCol) localMaxCol = j;
                     }
                 }
-            } 
+            }
 
-            // Merge local bounding box + population into the global variables
+            // Merge thread-local results into global variables
             #pragma omp critical
             {
                 // Merge population
@@ -180,11 +210,9 @@ int main(int argc, char *argv[]){
                 if (localMinCol < newMinCol) newMinCol = localMinCol;
                 if (localMaxCol > newMaxCol) newMaxCol = localMaxCol;
             }
-        } 
+        }
 
-        printf("\nIteration %d; Population %d", curr + 1, global_population);
-
-        // Update bounding box for next iteration
+        // Update bounding box for the next iteration
         if (newMinRow <= newMaxRow && newMinCol <= newMaxCol) {
             minRow = newMinRow;
             maxRow = newMaxRow;
@@ -196,21 +224,23 @@ int main(int argc, char *argv[]){
             maxRow = maxCol = -1;
         }
 
-        // Swap old_grid and new_grid
+        // Swap the grids
         int **temp = old_grid;
         old_grid = new_grid;
         new_grid = temp;
 
-        // If population is zero, we can break out early to save time
+        // Break if all cells are dead
         if (global_population == 0) {
             printf("\nAll cells died at iteration %d.\n", curr + 1);
             break;
         }
     }
 
+    printf("\nIteration %d; Population %d", iter, global_population);
+
     double end = omp_get_wtime();
 
-    // Cleanup
+    // Free allocated memory
     free_grid(old_grid);
     free_grid(new_grid);
 
