@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
     int minCol = start_col;
     int maxCol = start_col + GROWER_WIDTH - 1;
 
-    int iter = 5000;
+    int iter = 50000;
 
     // Define the 8 possible neighbor directions
     static const int directions[8][2] = {
@@ -223,7 +223,7 @@ int main(int argc, char *argv[]) {
             minRow = minCol = 0;
             maxRow = maxCol = -1;
         }
-
+        printf("\nIteration %d; Population %d", iter, global_population);
         // Swap the grids
         int **temp = old_grid;
         old_grid = new_grid;
@@ -236,7 +236,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    printf("\nIteration %d; Population %d", iter, global_population);
+    
 
     double end = omp_get_wtime();
 
