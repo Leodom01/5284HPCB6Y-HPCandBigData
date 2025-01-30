@@ -1,0 +1,30 @@
+***************************************************************************************************** 
+* WARNING: The 2022 software stack is deprecated. Please consider switching to
+the latest 2024 * 
+* software stack, or the older 2023 software stack. * 
+* * 
+* If you have any question, please contact us via
+http://servicedesk.surfsara.nl. * 
+***************************************************************************************************** 
+OpenMP parallelism
+Running with OMP_NUM_THREADS = 128
+CPUS:  128
+Starting the program...
+
+Iteration 5000; Population 5
+Program completed successfully. Took 2.483360 seconds
+Done with 128 threads.
+
+JOB STATISTICS
+==============
+Job ID: 9616979
+Cluster: snellius
+User/Group: scur1235/scur1235
+State: COMPLETED (exit code 0)
+Nodes: 1
+Cores per node: 128
+CPU Utilized: 00:05:16
+CPU Efficiency: 14.52% of 00:36:16 core-walltime
+Job Wall-clock time: 00:00:17
+Memory Utilized: 2.66 MB
+Memory Efficiency: 0.00% of 224.00 GB
