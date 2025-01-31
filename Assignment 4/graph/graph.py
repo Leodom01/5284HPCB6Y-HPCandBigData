@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
+plt.figure(figsize=(8, 6))
 df = pd.read_csv("output.csv")
-df = df[df['size'].isin([512, 1024, 2048, 4096])]
+#df = df[df['size'].isin([512, 1024, 2048, 4096])]
 
 # Categories for different test cases
 categories = df['size']
@@ -31,11 +31,11 @@ labels = ['Kernel Creation', 'Memory Management', 'Computation']
 colors = ['yellow', 'orange', 'red']
 
 for i in range(len(components)):
-    plt.bar(x - bar_width / 2, components[i], width=bar_width, bottom=bottoms, label=labels[i], color=colors[i])
+    plt.bar(x, components[i], width=bar_width, bottom=bottoms, label=labels[i], color=colors[i])
     bottoms += np.array(components[i])  # Update bottom position for stacking
 
 # Plot total execution time
-plt.bar(x + bar_width / 2, iterative_solution, width=bar_width, color='blue', label='Iterative solution')
+#plt.bar(x + bar_width / 2, iterative_solution, width=bar_width, color='blue', label='Iterative solution')
 #plt.bar(x + bar_width / 2, pythonic_solution, width=bar_width, color='grey', label='Pythonic solution')
 
 # Labels and formatting
