@@ -30,13 +30,15 @@ components = [kernel_creation, memory_management, computation]
 labels = ['Kernel Creation', 'Memory Management', 'Computation']
 colors = ['yellow', 'orange', 'red']
 
-for i in range(len(components)):
-    plt.bar(x, components[i], width=bar_width, bottom=bottoms, label=labels[i], color=colors[i])
-    bottoms += np.array(components[i])  # Update bottom position for stacking
+#for i in range(len(components)):
+#    plt.bar(x, components[i], width=bar_width, bottom=bottoms, label=labels[i], color=colors[i])
+#    bottoms += np.array(components[i])  # Update bottom position for stacking
 
 # Plot total execution time
 #plt.bar(x + bar_width / 2, iterative_solution, width=bar_width, color='blue', label='Iterative solution')
 #plt.bar(x + bar_width / 2, pythonic_solution, width=bar_width, color='grey', label='Pythonic solution')
+
+plt.bar(x, computation, width=bar_width, bottom=bottoms, label="Computation time", color="blue")
 
 # Labels and formatting
 plt.xticks(x, categories)
